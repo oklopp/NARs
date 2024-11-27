@@ -1,0 +1,133 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathabx} 
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{nomencl}
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}[theorem]{Assumption}
+
+\newcommand{\pa}[1]{\left(#1\right)}
+\newcommand{\cro}[1]{\left[#1\right]}
+\newcommand{\ac}[1]{\left\{#1\right\}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bbE}{\mathbb{E}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\hte}{\widehat \theta}
+
+\title{Prediction error for Ridge}
+
+\begin{document}
+
+\maketitle
+ 
+\section{Setting}
+We consider the model
+$$\bbX_t = \bbZ_{t-1} \theta^* + \eps_t,$$
+with  $\eps_{t}\sim\mathcal{N}(0,I)$ i.i.d. and $\eps_{t}$ independent of $\bbZ_{0},\ldots,\bbZ_{t-1}$.
+
+\section{Estimation with Forward}
+We define
+$$\hte_{t}:= G_{t}^{-1} \sum_{s=1}^{t-1}\bbZ^T_{s-1}\bbX_{s},\quad \textrm{with}\quad G_{t}=\sum_{s=1}^{t} \bbZ^T_{s-1}\bbZ_{s-1}+\lambda I.$$
+
+We want to bound the prediction error 
+$$\sum_{t=1}^T \|\bbZ_{t-1} (\hte_{t}-\theta^*)\|^2.$$
+We observe that, by design, we can easily derive a bound on $\|G_{t}^{1/2} (\hte_{t}-\theta^*)\|^2$. Hence, we split the prediction error in 
+\begin{align}
+\|\bbZ_{t-1} (\hte_{t}-\theta^*)\|^2&\leq |\bbZ_{t-1}G_{t}^{-1/2}|^2_{op}\ \|G_{t}^{1/2} (\hte_{t}-\theta^*)\|^2 \nonumber\\
+ &= \lambda_{\max} (\bbZ_{t-1}G_{t}^{-1}\bbZ_{t-1}) \ \|\hte_{t}-\theta^*\|^2_{G_{t}}.\label{eq:basic}
+\end{align}
+ 
+\subsection{Bounding the second term in (\ref{eq:basic})} 
+We have 
+$$G_{t}^{1/2}(\hte_{t}-\theta^*) = G_{t}^{-1/2} \pa{\sum_{s\leq t-1} \bbZ_{s-1}^T\eps_{s}-(\bbZ_{t-1}^T\bbZ_{t-1}+\lambda) \theta^*}.$$
+The first term $G_{t}^{-1/2} \sum_{s\leq t-1} \bbZ_{s-1}^T\eps_{s}$ can be handled by classical martingale arguments.
+For any $x$ 
+$$\bbE\cro{\exp\langle \bbZ_{t-1}x, \eps_{t}\rangle}=\exp\pa{{1\over 2} \|x\|^2_{\bbZ_{t-1}^T\bbZ_{t-1}}},$$
+hence 
+$$M_{t}(x)=\exp\pa{\langle x, \sum_{s\leq t-1} \bbZ_{s-1}^T\eps_{s}\rangle-{1\over 2} \|x\|^2_{\sum_{s=1}^{t-1}\bbZ_{s-1}^T\bbZ_{s-1}}}$$
+ is a martingale and, with usual arguments, we get that with probability at least $1-\delta$, for all $t\geq 1$
+ $$\|\sum_{s\leq t-1} \bbZ_{s-1}^T\eps_{s}\|_{G_{t}^{-1}}^2 \leq 2\log(1/\delta)+\log \frac{\operatorname{det} G_{t}}{\operatorname{det} G_{0}}.$$
+ The remaining term can be upper bounded by
+ $$\|G_{t}^{-1/2} (\bbZ_{t-1}^T\bbZ_{t-1}+\lambda) \theta^*\|^2\leq |G_{t}^{-1/2} (\bbZ_{t-1}^T\bbZ_{t-1}+\lambda I)|^2_{op} \|\theta^*\|^2\leq |\bbZ_{t-1}^T\bbZ_{t-1}+\lambda I|_{op} \|\theta^*\|^2. $$
+Hence,  with probability at least $1-\delta$, for all $1\leq t\leq T$
+$$\|G_{t}^{1/2}(\hte_{t}-\theta^*)\|^2 \leq 4\log(1/\delta)+2\log \frac{\operatorname{det} G_{T}}{\operatorname{det} G_{0}} + 2 
+  \pa{\max_{t\leq T}|\bbZ_{t-1}|^2_{op}+\lambda} \|\theta^*\|^2.$$
+  
+  
+ \subsection{Bounding the sum of the first terms in (\ref{eq:basic})}
+ We have $G_{t+1}=G_{t} + \bbZ^T_{t}\bbZ_{t}$. Hence 
+\begin{align*}
+ \lambda_{\max} \left( \mathbb{Z}_{t} G_{t+1}^{-1} \mathbb{Z}_{t}^{\top} \right) &= \lambda_{\max} \left( G_{t+1}^{-1 / 2} \mathbb{Z}_{t}^{T} \mathbb{Z}_{t} G_{t+1}^{-1 / 2} \right)
+ = \lambda_{\max} \left( G_{t+1}^{-1 / 2} \left( G_{t+1} - G_{t} \right) G_{t+1}^{-1 / 2} \right) \\
+& = 1 - \lambda_{\min} \left( G_{t+1}^{-1 / 2} G_{t} G_{t+1}^{-1 / 2} \right) 
+ \leq \log \frac{1}{\lambda_{\min} \left( G_{t+1}^{-1 / 2} G_{t} G_{t+1}^{-1 / 2} \right)}\\
+ & = \log \lambda_{\max} \left( G_{t+1}^{1 / 2} G_{t}^{-1} G_{t+1}^{1 / 2} \right)\leq \log \frac{\operatorname{det} G_{t+1}}{\operatorname{det} G_{t}},
+\end{align*}
+where the last inequality follows from $G_{t+1}^{1 / 2} G_{t}^{-1} G_{t+1}^{1 / 2} \succeq I$.
+Hence,
+$$\sum_{t=1}^T \lambda_{\max} \left( \mathbb{Z}_{t-1} G_{t}^{-1} \mathbb{Z}_{t-1}^{\top} \right)\leq \log \frac{\operatorname{det} G_{T}}{\operatorname{det} G_{0}}.$$
+ 
+\subsection{Combining the two bounds} 
+ With probability at least $1-\delta$
+$$\sum_{t=1}^{T}\|\bbZ_{t-1} (\hte_{t}-\theta^*)\|^2 \leq \pa{4\log(1/\delta)+2\log \frac{\operatorname{det} G_{T}}{\operatorname{det} G_{0}} + 2  \pa{ \max_{t\leq T}|\bbZ_{t-1} |^2_{op}+\lambda} \|\theta^*\|^2} \log \frac{\operatorname{det} G_{T}}{\operatorname{det} G_{0}} .$$
+
+As for $\log \frac{\operatorname{det} G_{T}}{\operatorname{det} G_{0}}$, writing $D=\textrm{dim}(\theta^*)$, Jensen inequality ensures that
+\begin{align*}
+\log \frac{\operatorname{det} G_{T}}{\operatorname{det} G_{0}}&\leq D\log\pa{\operatorname{Tr}(G_{T}/(\lambda D))} \\
+&\leq D\log \pa{D^{-1}\pa{1+\sum_{t\leq T}\lambda^{-1}\|\bbZ_{t-1}\|^2_{F}}}.
+\end{align*}
+
+
+For these bounds to be useful, we need high probability bounds on $\sum_{t\leq T}\|\bbZ_{t-1}\|^2_{F}$ and $ \max_{t\leq T}|\bbZ_{t-1} |^2_{op}$.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
